@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, X, Film, Menu } from "lucide-react";
+import { Search, X, Film, Menu, Crown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearch } from "@/hooks/use-movies";
 import { getImageUrl } from "@/lib/tmdb";
@@ -62,6 +62,10 @@ const Navbar = () => {
               </Link>
               <Link to="/browse/tv" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
                 TV Shows
+              </Link>
+              <Link to="/pricing" className="text-sm font-medium text-primary hover:text-gold-light transition-colors flex items-center gap-1">
+                <Crown className="w-3.5 h-3.5" />
+                Plans
               </Link>
             </div>
 
@@ -149,6 +153,10 @@ const Navbar = () => {
                 <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-foreground/80 hover:text-primary py-2">Home</Link>
                 <Link to="/browse/movie" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-foreground/80 hover:text-primary py-2">Movies</Link>
                 <Link to="/browse/tv" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-foreground/80 hover:text-primary py-2">TV Shows</Link>
+                <Link to="/pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-primary hover:text-gold-light py-2 flex items-center gap-1.5">
+                  <Crown className="w-3.5 h-3.5" />
+                  Plans & Pricing
+                </Link>
               </div>
             </motion.div>
           )}
