@@ -2,7 +2,7 @@ import type { Movie, MovieDetail, TVShowDetail, MediaItem } from "@/types/movie"
 
 // TMDB API Configuration
 // Get your free API key at: https://www.themoviedb.org/settings/api
-const TMDB_API_KEY = ""; // Add your TMDB API key here
+const TMDB_API_KEY = "5a371fda45fc0bed5e70e09cff64cdf1";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 export const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
