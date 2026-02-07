@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, X, Film, Menu, Crown } from "lucide-react";
+import { Search, X, Film, Menu, Crown, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearch } from "@/hooks/use-movies";
 import { getImageUrl } from "@/lib/tmdb";
+import { useSubscription, type SubscriptionTier } from "@/contexts/SubscriptionContext";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -12,6 +13,9 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { data: searchResults } = useSearch(searchQuery);
+  const { tier, setTier } = useSubscription();
+
+  const tiers: SubscriptionTier[] = ["free", "basic", "standard", "premium"];
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -69,8 +73,25 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Search + Mobile Menu */}
-            <div className="flex items-center gap-3">
+            {/* Tier Switcher + Search + Mobile Menu */}
+            <div className="flex items-center gap-2">
+              {/* Tier Selector (demo) */}
+              <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-secondary/80 border border-border">
+                <Shield className="w-3.5 h-3.5 text-primary mr-1" />
+                {tiers.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTier(t)}
+                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+                      tier === t
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
                 className="w-10 h-10 rounded-full flex items-center justify-center text-foreground/70 hover:text-primary transition-colors hover:bg-secondary"
