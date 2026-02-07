@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
-import { Star, Play } from "lucide-react";
+import { Star, Play, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getImageUrl } from "@/lib/tmdb";
+import { useSubscription, getContentTier } from "@/contexts/SubscriptionContext";
+import TierBadge from "@/components/TierBadge";
 import type { MediaItem } from "@/types/movie";
 
 interface MovieCardProps {
@@ -11,9 +13,13 @@ interface MovieCardProps {
 
 const MovieCard = ({ movie, index = 0 }: MovieCardProps) => {
   const navigate = useNavigate();
+  const { canAccess } = useSubscription();
   const title = "title" in movie ? movie.title : (movie as any).name || "Untitled";
   const type = movie.media_type || "movie";
   const year = ("release_date" in movie ? movie.release_date : (movie as any).first_air_date)?.slice(0, 4);
+
+  const contentTier = getContentTier(movie);
+  const hasAccess = canAccess(contentTier);
 
   const handleClick = () => {
     navigate(`/watch/${type}/${movie.id}`);
@@ -33,19 +39,39 @@ const MovieCard = ({ movie, index = 0 }: MovieCardProps) => {
         <img
           src={getImageUrl(movie.poster_path)}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+            !hasAccess ? "brightness-50" : ""
+          }`}
           loading="lazy"
         />
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-          <motion.div
-            initial={{ scale: 0 }}
-            whileHover={{ scale: 1.1 }}
-            className="w-14 h-14 rounded-full bg-primary flex items-center justify-center glow-gold"
-          >
-            <Play className="w-6 h-6 text-primary-foreground fill-current ml-0.5" />
-          </motion.div>
+
+        {/* Tier Badge */}
+        <div className="absolute top-2 left-2 z-10">
+          <TierBadge tier={contentTier} />
         </div>
+
+        {/* Lock Overlay for gated content */}
+        {!hasAccess && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="w-12 h-12 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center border border-primary/30">
+              <Lock className="w-5 h-5 text-primary" />
+            </div>
+          </div>
+        )}
+
+        {/* Hover Overlay (only for accessible content) */}
+        {hasAccess && (
+          <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              whileHover={{ scale: 1.1 }}
+              className="w-14 h-14 rounded-full bg-primary flex items-center justify-center glow-gold"
+            >
+              <Play className="w-6 h-6 text-primary-foreground fill-current ml-0.5" />
+            </motion.div>
+          </div>
+        )}
+
         {/* Rating Badge */}
         <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-lg bg-background/80 backdrop-blur-sm">
           <Star className="w-3 h-3 text-primary fill-primary" />

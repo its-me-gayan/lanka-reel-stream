@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, Crown, Zap, Star, Smartphone, Monitor, Tv, Download, Headphones, Globe } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useSubscription, type SubscriptionTier } from "@/contexts/SubscriptionContext";
+import { toast } from "sonner";
 
 interface PlanFeature {
   text: string;
@@ -21,6 +24,7 @@ interface Plan {
   quality: string;
   gradient: string;
   popular?: boolean;
+  tier: SubscriptionTier;
 }
 
 const plans: Plan[] = [
@@ -33,6 +37,7 @@ const plans: Plan[] = [
     screens: 1,
     quality: "SD (480p)",
     gradient: "from-secondary to-cinema-elevated",
+    tier: "basic",
     features: [
       { text: "Unlimited movies & TV shows", included: true },
       { text: "Watch on mobile & tablet", included: true },
@@ -55,6 +60,7 @@ const plans: Plan[] = [
     screens: 2,
     quality: "Full HD (1080p)",
     gradient: "from-primary/20 to-gold-dark/20",
+    tier: "standard",
     features: [
       { text: "Unlimited movies & TV shows", included: true },
       { text: "Watch on any device", included: true },
@@ -75,6 +81,7 @@ const plans: Plan[] = [
     screens: 4,
     quality: "4K Ultra HD + HDR",
     gradient: "from-primary/30 to-gold-light/10",
+    tier: "premium",
     features: [
       { text: "Unlimited movies & TV shows", included: true },
       { text: "Watch on any device", included: true },
@@ -99,7 +106,16 @@ const paymentMethods = [
 
 const PricingPage = () => {
   const [isYearly, setIsYearly] = useState(false);
+  const { tier: currentTier, setTier } = useSubscription();
+  const navigate = useNavigate();
 
+  const handleSelectPlan = (planTier: SubscriptionTier) => {
+    setTier(planTier);
+    toast.success(`Switched to ${planTier.charAt(0).toUpperCase() + planTier.slice(1)} plan! 🎬`, {
+      description: "You now have access to the content in this tier.",
+    });
+    navigate("/");
+  };
   return (
     <main className="min-h-screen bg-background">
       <Navbar />
@@ -221,13 +237,16 @@ const PricingPage = () => {
 
                 {/* CTA Button */}
                 <button
+                  onClick={() => handleSelectPlan(plan.tier)}
                   className={`w-full py-3 rounded-xl font-medium text-sm transition-all ${
-                    plan.popular
+                    currentTier === plan.tier
+                      ? "bg-accent text-accent-foreground cursor-default"
+                      : plan.popular
                       ? "bg-primary text-primary-foreground hover:brightness-110 glow-gold"
                       : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
                   }`}
                 >
-                  Start Free Trial
+                  {currentTier === plan.tier ? "Current Plan" : "Select Plan"}
                 </button>
 
                 {/* Divider */}

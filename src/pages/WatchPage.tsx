@@ -4,11 +4,14 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Star, Clock, Calendar, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MoviePlayer from "@/components/MoviePlayer";
+import ContentGate from "@/components/ContentGate";
 import MovieCard from "@/components/MovieCard";
 import Footer from "@/components/Footer";
 import { useMovieDetail, useTVDetail } from "@/hooks/use-movies";
 import { getBackdropUrl, getImageUrl } from "@/lib/tmdb";
 import { SAMPLE_MOVIES, SAMPLE_HERO } from "@/lib/tmdb";
+import { useSubscription, getContentTier } from "@/contexts/SubscriptionContext";
+import TierBadge from "@/components/TierBadge";
 import type { MediaItem } from "@/types/movie";
 
 const WatchPage = () => {
@@ -46,6 +49,15 @@ const WatchPage = () => {
 
   const runtime = !isTV && movieDetail ? movieDetail.runtime : null;
   const releaseDate = !isTV && movieDetail ? movieDetail.release_date : tvDetail?.first_air_date || "";
+
+  // Content gating
+  const { canAccess } = useSubscription();
+  const contentTier = getContentTier({
+    vote_average: voteAvg,
+    popularity: detail?.popularity || sampleMovie.popularity,
+    release_date: releaseDate,
+  });
+  const hasAccess = canAccess(contentTier);
 
   return (
     <main className="min-h-screen bg-background">
@@ -97,8 +109,9 @@ const WatchPage = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="flex-1"
           >
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-foreground tracking-wide mb-3">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-foreground tracking-wide mb-3 flex items-center gap-3 flex-wrap">
               {title}
+              <TierBadge tier={contentTier} className="text-xs" />
             </h1>
 
             {/* Meta */}
@@ -189,14 +202,18 @@ const WatchPage = () => {
               </div>
             )}
 
-            {/* Player */}
-            <MoviePlayer
-              tmdbId={movieId}
-              type={isTV ? "tv" : "movie"}
-              title={title}
-              season={selectedSeason}
-              episode={selectedEpisode}
-            />
+            {/* Player or Gate */}
+            {hasAccess ? (
+              <MoviePlayer
+                tmdbId={movieId}
+                type={isTV ? "tv" : "movie"}
+                title={title}
+                season={selectedSeason}
+                episode={selectedEpisode}
+              />
+            ) : (
+              <ContentGate requiredTier={contentTier} title={title} />
+            )}
           </motion.div>
         </div>
 
